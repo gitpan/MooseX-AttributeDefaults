@@ -3,7 +3,7 @@ use Moose::Role;
 
 requires qw(default_options);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 before '_process_options' => sub {
   my ($class, $name, $options) = @_;
@@ -24,7 +24,7 @@ metaclasses
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -57,7 +57,33 @@ implementation details of the available workarounds.
       predicate => 'has_attr',
     );
 
-    # 'attr' is a ro string with "default value for attr" as its default.
+    # 'attr' is a ro string with "default value for attr" as its 
+    # default and a 'has_attr' predicate
+
+    ### Or as a trait instead of a metaclass
+    
+    package Acme::Common::Array;
+    use Moose::Role;
+
+    with qw(MooseX::AttributeDefaults);
+
+    sub default_options {
+      is      => 'ro',
+      isa     => 'ArrayRef',
+      default => sub { [] },
+    }
+
+    package Some::Class;
+    use Moose;
+    use MooseX::AttributeHelpers;
+
+    has attr => (
+      metaclass => 'Collection::Array',
+      traits    => [qw(Acme::Common::Array)],
+      provides  => {
+        'push' => 'add_attr',
+      },
+    );
 
 =head1 REQUIRED METHODS
 
